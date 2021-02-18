@@ -1,3 +1,5 @@
+import 'package:exercise/playvideo.dart';
+import 'package:exercise/register.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -204,10 +206,13 @@ class _NoticationState extends State<Notication> {
             ListTile(
               title: Text('Item 1'),
               onTap: () {
+                print("ddd");
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Playvideo()));
                 // Update the state of the app
                 // ...
                 // Then close the drawer
-                Navigator.pop(context);
+                // Navigator.pop(context);
               },
             ),
             ListTile(
