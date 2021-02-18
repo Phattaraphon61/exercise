@@ -8,6 +8,8 @@ class Notication extends StatefulWidget {
 }
 
 class _NoticationState extends State<Notication> {
+  TimeOfDay time;
+  TimeOfDay picked;
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   AndroidInitializationSettings androidInitializationSettings;
@@ -19,6 +21,7 @@ class _NoticationState extends State<Notication> {
   void initState() {
     super.initState();
     initializing();
+    time = TimeOfDay.now();
   }
 
   void initializing() async {
@@ -58,7 +61,8 @@ class _NoticationState extends State<Notication> {
   Future<void> notificationAfterSec() async {
     var now = new DateTime.now();
     var timenow = TimeOfDay.now();
-    var tod = TimeOfDay(hour: 20, minute:00 );
+    var tod = time;
+    // var tod = TimeOfDay(hour: 20, minute: 00);
     double _doubleYourTime = tod.hour.toDouble() + (tod.minute.toDouble() / 60);
     double _doubleNowTime =
         timenow.hour.toDouble() + (timenow.minute.toDouble() / 60);
@@ -88,11 +92,18 @@ class _NoticationState extends State<Notication> {
     NotificationDetails notificationDetails =
         NotificationDetails(androidNotificationDetails, iosNotificationDetails);
     await flutterLocalNotificationsPlugin.schedule(
-        1, 'Hello there', '5555555', timeDelayed, notificationDetails);
+      1,
+      'Hello there',
+      '5555555',
+      timeDelayed,
+      notificationDetails,
+    );
   }
 
   Future onSelectNotification(String payLoad) {
+    print("6666");
     if (payLoad != null) {
+      print("88888");
       print(payLoad);
     }
 
@@ -115,10 +126,23 @@ class _NoticationState extends State<Notication> {
     );
   }
 
+  Future<Null> _selectTime(BuildContext context) async {
+    final TimeOfDay timePicked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (timePicked != null)
+      setState(() {
+        time = timePicked;
+      });
+    print(time);
+    _showNotificationsAfterSecond();
+  }
+
   @override
   Widget build(BuildContext context) {
-  return Scaffold(
-      appBar: AppBar(title: Text("sdfkjsdkfjskfjsf")),
+    return Scaffold(
+      appBar: AppBar(title: Text("setting")),
       body: Container(
         width: double.infinity,
         child: Column(
@@ -146,11 +170,24 @@ class _NoticationState extends State<Notication> {
                 ),
               ),
             ),
+            FlatButton(
+              onPressed: () {
+                _selectTime(context);
+                print(time);
+              },
+              color: Colors.blue,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  "testpickedclok",
+                  style: TextStyle(fontSize: 20.0, color: Colors.white),
+                ),
+              ),
+            ),
           ],
         ),
       ),
       drawer: Drawer(
-      
         // Add a ListView to the drawer. This ensures the user can scroll
         // through the options in the drawer if there isn't enough vertical
         // space to fit everything.

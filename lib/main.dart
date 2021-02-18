@@ -67,8 +67,11 @@ class _MyHomePageState extends State<MyHomePage> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
+                  // style: TextStyle(height: 0.1),
                   decoration: InputDecoration(
                     hintText: 'Email',
+                    isDense: true,
+                    contentPadding: EdgeInsets.all(8),
                     suffixIcon: Icon(Icons.email),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20.0),
@@ -83,6 +86,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   keyboardType: TextInputType.visiblePassword,
                   decoration: InputDecoration(
                     hintText: 'Password',
+                    isDense: true,
+                    contentPadding: EdgeInsets.all(8),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20.0),
                     ),
@@ -119,7 +124,10 @@ class _MyHomePageState extends State<MyHomePage> {
                           side: BorderSide(color: Colors.red)),
                       child: Text('Login'),
                       color: Color(0xffEE7B23),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => Notication()));
+                      },
                     ),
                   ],
                 ),

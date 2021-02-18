@@ -1,3 +1,4 @@
+import 'package:exercise/main.dart';
 import 'package:flutter/material.dart';
 
 class Second extends StatefulWidget {
@@ -21,7 +22,7 @@ class _SecondState extends State<Second> {
             children: [
               Container(
                 width: width,
-                height: height * 0.12,
+                height: height * 0.15,
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -36,35 +37,44 @@ class _SecondState extends State<Second> {
                   ],
                 ),
               ),
+              SizedBox(height: 20,),
                  Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
                   decoration: InputDecoration(
                     hintText: 'Name',
-                    suffixIcon: Icon(Icons.email),
+                    isDense: true,
+                    contentPadding: EdgeInsets.all(8),
+                    suffixIcon: Icon(Icons.account_box),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20.0),
                     ),
                   ),
                 ),
               ),
+              SizedBox(height: 10,),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
                   decoration: InputDecoration(
                     hintText: 'Lastname',
-                    suffixIcon: Icon(Icons.email),
+                    isDense: true,
+                    contentPadding: EdgeInsets.all(8),
+                    suffixIcon: Icon(Icons.assignment_ind),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20.0),
                     ),
                   ),
                 ),
               ),
+              SizedBox(height: 10,),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
                   decoration: InputDecoration(
                     hintText: 'Email',
+                    isDense: true,
+                    contentPadding: EdgeInsets.all(8),
                     suffixIcon: Icon(Icons.email),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20.0),
@@ -72,6 +82,7 @@ class _SecondState extends State<Second> {
                   ),
                 ),
               ),
+              SizedBox(height: 10,),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
@@ -79,6 +90,8 @@ class _SecondState extends State<Second> {
                   keyboardType: TextInputType.visiblePassword,
                   decoration: InputDecoration(
                     hintText: 'Password',
+                    isDense: true,
+                    contentPadding: EdgeInsets.all(8),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20.0),
                     ),
@@ -100,13 +113,16 @@ class _SecondState extends State<Second> {
                   ),
                 ),
               ),
+              SizedBox(height: 10,),
                     Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
                   obscureText: _passwordVisible,
                   keyboardType: TextInputType.visiblePassword,
                   decoration: InputDecoration(
-                    hintText: 'Password',
+                    hintText: 'Confirm password',
+                    isDense: true,
+                    contentPadding: EdgeInsets.all(8),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20.0),
                     ),
@@ -150,7 +166,7 @@ class _SecondState extends State<Second> {
               SizedBox(height: 20.0),
               GestureDetector(
                 onTap: () {
-                  // Navigator.push(context, MaterialPageRoute(builder: (context)=>Myapp()));
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>MyApp()));
                 },
                 child: Text.rich(
                   TextSpan(text: 'Already have an account', children: [
