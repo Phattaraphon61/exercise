@@ -1,3 +1,4 @@
+import 'package:exercise/playvideo.dart';
 import 'package:exercise/register.dart';
 import 'package:flutter/material.dart';
 import 'nogication.dart';
@@ -126,7 +127,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Color(0xffEE7B23),
                       onPressed: () {
                         Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => Notication()));
+                            MaterialPageRoute(builder: (context) => Playvideo()));
                       },
                     ),
                   ],

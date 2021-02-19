@@ -4,6 +4,8 @@
 
 // ignore_for_file: public_member_api_docs
 
+import 'package:exercise/main.dart';
+import 'package:exercise/nogication.dart';
 /// An example of using the plugin, controlling lifecycle and playback of the
 /// video.
 
@@ -14,47 +16,97 @@ import 'package:video_player/video_player.dart';
 class Playvideo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 1,
-      child: Scaffold(
-        key: const ValueKey<String>('home_page'),
-        appBar: AppBar(
-          title: const Text('Video player example'),
-          actions: <Widget>[
-            // IconButton(
-            //   key: const ValueKey<String>('push_tab'),
-            //   icon: const Icon(Icons.navigation),
-            //   onPressed: () {
-            //     Navigator.push<_PlayerVideoAndPopPage>(
-            //       context,
-            //       MaterialPageRoute<_PlayerVideoAndPopPage>(
-            //         builder: (BuildContext context) => _PlayerVideoAndPopPage(),
-            //       ),
-            //     );
-            //   },
-            // )
-          ],
-          // bottom: const TabBar(
-          //   isScrollable: true,
-          //   tabs: <Widget>[
-          //     Tab(
-          //       icon: Icon(Icons.cloud),
-          //       text: "Remote",
-          //     ),
-          //     Tab(icon: Icon(Icons.insert_drive_file), text: "Asset"),
-          //     Tab(icon: Icon(Icons.list), text: "List example"),
-          //   ],
-          // ),
-        ),
-        body: TabBarView(
+    return Scaffold(
+      appBar: AppBar(title: Text("home")),
+      body: Container(
+        width: double.infinity,
+        child: Column(
           children: <Widget>[
             _BumbleBeeRemoteVideo(),
-            // _ButterFlyAssetVideo(),
-            // _ButterFlyAssetVideoInList(),
+          ],
+        ),
+      ),
+      drawer: Drawer(
+        // Add a ListView to the drawer. This ensures the user can scroll
+        // through the options in the drawer if there isn't enough vertical
+        // space to fit everything.
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              child: Text('Drawer Header'),
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+            ),
+            ListTile(
+              title: Text('ตั้งค่า',style: TextStyle(fontSize: 18),),
+              onTap: () {
+                print("ddd");
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Notication()));
+                // Update the state of the app
+                // ...
+                // Then close the drawer
+                // Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Text('ออกจากระบบ',style: TextStyle(fontSize: 18),),
+              onTap: () {
+                // Update the state of the app
+                // ...
+                // Then close the drawer
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => MyApp()));
+              },
+            ),
           ],
         ),
       ),
     );
+    // return DefaultTabController(
+    //   length: 1,
+    //   child: Scaffold(
+    //     key: const ValueKey<String>('home_page'),
+    //     appBar: AppBar(
+    //       title: const Text('Video player example'),
+    //       actions: <Widget>[
+    //         // IconButton(
+    //         //   key: const ValueKey<String>('push_tab'),
+    //         //   icon: const Icon(Icons.navigation),
+    //         //   onPressed: () {
+    //         //     Navigator.push<_PlayerVideoAndPopPage>(
+    //         //       context,
+    //         //       MaterialPageRoute<_PlayerVideoAndPopPage>(
+    //         //         builder: (BuildContext context) => _PlayerVideoAndPopPage(),
+    //         //       ),
+    //         //     );
+    //         //   },
+    //         // )
+    //       ],
+    //       // bottom: const TabBar(
+    //       //   isScrollable: true,
+    //       //   tabs: <Widget>[
+    //       //     Tab(
+    //       //       icon: Icon(Icons.cloud),
+    //       //       text: "Remote",
+    //       //     ),
+    //       //     Tab(icon: Icon(Icons.insert_drive_file), text: "Asset"),
+    //       //     Tab(icon: Icon(Icons.list), text: "List example"),
+    //       //   ],
+    //       // ),
+    //     ),
+    //     body: TabBarView(
+    //       children: <Widget>[
+    //         _BumbleBeeRemoteVideo(),
+    //         // _ButterFlyAssetVideo(),
+    //         // _ButterFlyAssetVideoInList(),
+    //       ],
+    //     ),
+    //   ),
+    // );
   }
 }
 
@@ -169,7 +221,7 @@ class _ButterFlyAssetVideoState extends State<_ButterFlyAssetVideo> {
       child: Column(
         children: <Widget>[
           Container(
-            padding: const EdgeInsets.only(top: 20.0),
+            padding: const EdgeInsets.only(top: 10),
           ),
           const Text('With assets mp4'),
           Container(
@@ -210,6 +262,7 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
     _videoPlayerController.addListener(() {
       if (startedPlaying && !_videoPlayerController.value.isPlaying) {
         print("555555555555555555555555555555555555555555555");
+        _showMyDialog();
         // Navigator.pop(context);
       }
     });
@@ -219,6 +272,34 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
   void dispose() {
     _videoPlayerController.dispose();
     super.dispose();
+  }
+
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(''),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('ต้องการบันทึกวันและเวลาหรือไม่'),
+                // Text('Would you like to approve of this message?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('ยืนยัน'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<bool> started() async {
@@ -236,9 +317,9 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
       elevation: 0,
       child: Column(children: <Widget>[
         SizedBox(
-          height: height * 0.1,
+          height: height * 0.2,
         ),
-        Container(padding: const EdgeInsets.only(top: 20.0)),
+        Container(padding: const EdgeInsets.only(top: 20)),
         const Text('วีดีโอออกกำลังกาย'),
         Padding(
           padding: const EdgeInsets.only(top: 15),

@@ -1,3 +1,4 @@
+import 'package:exercise/main.dart';
 import 'package:exercise/playvideo.dart';
 import 'package:exercise/register.dart';
 import 'package:flutter/cupertino.dart';
@@ -150,28 +151,28 @@ class _NoticationState extends State<Notication> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            FlatButton(
-              color: Colors.blue,
-              onPressed: _showNotifications,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  "Show Notification",
-                  style: TextStyle(fontSize: 20.0, color: Colors.white),
-                ),
-              ),
-            ),
-            FlatButton(
-              color: Colors.blue,
-              onPressed: _showNotificationsAfterSecond,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  "Show Notification after few sec",
-                  style: TextStyle(fontSize: 20.0, color: Colors.white),
-                ),
-              ),
-            ),
+            // FlatButton(
+            //   color: Colors.blue,
+            //   onPressed: _showNotifications,
+            //   child: Padding(
+            //     padding: const EdgeInsets.all(8.0),
+            //     child: Text(
+            //       "Show Notification",
+            //       style: TextStyle(fontSize: 20.0, color: Colors.white),
+            //     ),
+            //   ),
+            // ),
+            // FlatButton(
+            //   color: Colors.blue,
+            //   onPressed: _showNotificationsAfterSecond,
+            //   child: Padding(
+            //     padding: const EdgeInsets.all(8.0),
+            //     child: Text(
+            //       "Show Notification after few sec",
+            //       style: TextStyle(fontSize: 20.0, color: Colors.white),
+            //     ),
+            //   ),
+            // ),
             FlatButton(
               onPressed: () {
                 _selectTime(context);
@@ -181,7 +182,7 @@ class _NoticationState extends State<Notication> {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  "testpickedclok",
+                  "pickedclok",
                   style: TextStyle(fontSize: 20.0, color: Colors.white),
                 ),
               ),
@@ -204,9 +205,8 @@ class _NoticationState extends State<Notication> {
               ),
             ),
             ListTile(
-              title: Text('Item 1'),
+              title: Text('Home',style: TextStyle(fontSize: 18),),
               onTap: () {
-                print("ddd");
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => Playvideo()));
                 // Update the state of the app
@@ -216,12 +216,13 @@ class _NoticationState extends State<Notication> {
               },
             ),
             ListTile(
-              title: Text('Item 2'),
+              title: Text('ออกจากระบบ',style: TextStyle(fontSize: 18),),
               onTap: () {
                 // Update the state of the app
                 // ...
                 // Then close the drawer
-                Navigator.pop(context);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => MyApp()));
               },
             ),
           ],
