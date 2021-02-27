@@ -1,9 +1,12 @@
+import 'package:exercise/history.dart';
+import 'package:exercise/loading.dart';
 import 'package:exercise/main.dart';
 import 'package:exercise/playvideo.dart';
 import 'package:exercise/register.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Notication extends StatefulWidget {
@@ -20,12 +23,35 @@ class _NoticationState extends State<Notication> {
   IOSInitializationSettings iosInitializationSettings;
   InitializationSettings initializationSettings;
   var timeDelayed;
+  String name;
+  String email;
+  String id;
+  String tokens;
 
   @override
   void initState() {
     super.initState();
     initializing();
     time = TimeOfDay.now();
+  }
+
+  Future<bool> checktoken() async {
+    print("ksdfjsjdf$tokens");
+    if (tokens == null) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String token = prefs.getString('token');
+      print(token);
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+      setState(() {
+        print(decodedToken);
+        tokens = token;
+        email = decodedToken['email'];
+        name = decodedToken['name'];
+        id = decodedToken['id'];
+       return true;
+      });
+    }
+    return true;
   }
 
   void initializing() async {
@@ -142,101 +168,141 @@ class _NoticationState extends State<Notication> {
     print(time);
     _showNotificationsAfterSecond();
   }
-  
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("ตั้งค่า")),
-      body: Container(
-        width: double.infinity,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            // FlatButton(
-            //   color: Colors.blue,
-            //   onPressed: _showNotifications,
-            //   child: Padding(
-            //     padding: const EdgeInsets.all(8.0),
-            //     child: Text(
-            //       "Show Notification",
-            //       style: TextStyle(fontSize: 20.0, color: Colors.white),
-            //     ),
-            //   ),
-            // ),
-            // FlatButton(
-            //   color: Colors.blue,
-            //   onPressed: _showNotificationsAfterSecond,
-            //   child: Padding(
-            //     padding: const EdgeInsets.all(8.0),
-            //     child: Text(
-            //       "Show Notification after few sec",
-            //       style: TextStyle(fontSize: 20.0, color: Colors.white),
-            //     ),
-            //   ),
-            // ),
-            FlatButton(
-              onPressed: () {            
-                // _selectTime(context);
-                // print(time);
-              },
-              color: Colors.blue,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  "pickedclok",
-                  style: TextStyle(fontSize: 20.0, color: Colors.white),
+    double width = MediaQuery.of(context).size.width;
+    return FutureBuilder(
+        future: checktoken(),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          print("ssssssss${tokens}");
+          if (tokens != null) {
+            print("ddddddddddddddddddd");
+            return Scaffold(
+              appBar: AppBar(title: Text("ตั้งค่า")),
+              body: Container(
+                width: double.infinity,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    // FlatButton(
+                    //   color: Colors.blue,
+                    //   onPressed: _showNotifications,
+                    //   child: Padding(
+                    //     padding: const EdgeInsets.all(8.0),
+                    //     child: Text(
+                    //       "Show Notification",
+                    //       style: TextStyle(fontSize: 20.0, color: Colors.white),
+                    //     ),
+                    //   ),
+                    // ),
+                    // FlatButton(
+                    //   color: Colors.blue,
+                    //   onPressed: _showNotificationsAfterSecond,
+                    //   child: Padding(
+                    //     padding: const EdgeInsets.all(8.0),
+                    //     child: Text(
+                    //       "Show Notification after few sec",
+                    //       style: TextStyle(fontSize: 20.0, color: Colors.white),
+                    //     ),
+                    //   ),
+                    // ),
+                    FlatButton(
+                      onPressed: () {
+                        // _selectTime(context);
+                        // print(time);
+                      },
+                      color: Colors.blue,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          "pickedclok",
+                          style: TextStyle(fontSize: 20.0, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-      drawer: Drawer(
-        // Add a ListView to the drawer. This ensures the user can scroll
-        // through the options in the drawer if there isn't enough vertical
-        // space to fit everything.
-        child: ListView(
-          // Important: Remove any padding from the ListView.
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              child: Text('Drawer Header'),
-              decoration: BoxDecoration(
-                color: Colors.blue,
+              drawer: Container(
+                width: width*0.6,
+                child: Drawer(
+                  // Add a ListView to the drawer. This ensures the user can scroll
+                  // through the options in the drawer if there isn't enough vertical
+                  // space to fit everything.
+                  child: ListView(
+                    // Important: Remove any padding from the ListView.
+                    padding: EdgeInsets.zero,
+                    children: <Widget>[
+                      DrawerHeader(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            CircleAvatar(
+                              child: Image.asset('assets/logo.png',),
+                            ),
+                            Text('ชื่อ : $name'),
+                            Text('อีเมล์ : $email')
+                          ],
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                        ),
+                      ),
+                      ListTile(
+                        title: Text(
+                          'วีดีโอ',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Playvideo()));
+                          // Update the state of the app
+                          // ...
+                          // Then close the drawer
+                          // Navigator.pop(context);
+                        },
+                      ),
+                      ListTile(
+                        title: Text(
+                          'สถิติ',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        onTap: () async {
+                          // Update the state of the app
+                          // ...
+                          // Then close the drawer
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) => History()));
+                        },
+                      ),
+                        ListTile(
+                        title: Text(
+                          'ออกจากระบบ',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        onTap: () async {
+                          // Update the state of the app
+                          // ...
+                          // Then close the drawer
+                          SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
+                          prefs.clear();
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) => MyApp()));
+                        },
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-            ListTile(
-              title: Text(
-                'วีดีโอ',
-                style: TextStyle(fontSize: 18),
-              ),
-              onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Playvideo()));
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                // Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: Text(
-                'ออกจากระบบ',
-                style: TextStyle(fontSize: 18),
-              ),
-              onTap: () async {
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.clear();
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => MyApp()));
-              },
-            ),
-          ],
-        ),
-      ),
-    );
+            );
+          } else {
+            return Scaffold(body: Loading());
+          }
+        });
   }
 }

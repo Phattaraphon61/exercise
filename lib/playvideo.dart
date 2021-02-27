@@ -1,11 +1,17 @@
+import 'dart:convert';
+
+import 'package:exercise/history.dart';
+import 'package:exercise/loading.dart';
 import 'package:exercise/main.dart';
 import 'package:exercise/nogication.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
+import 'package:http/http.dart' as http;
 
 class Playvideo extends StatefulWidget {
   @override
@@ -13,55 +19,217 @@ class Playvideo extends StatefulWidget {
 }
 
 class _PlayvideoState extends State<Playvideo> {
+  String name;
+  String email;
+  String ids;
+  String tokens;
+
+  VideoPlayerController _videoPlayerController;
+  bool startedPlaying = false;
+  Time timeee;
+
+  @override
+  void initState() {
+    super.initState();
+    _videoPlayerController = VideoPlayerController.asset('assets/video.mp4');
+    _videoPlayerController.addListener(() {
+      if (startedPlaying && !_videoPlayerController.value.isPlaying) {
+        if (_videoPlayerController.value.position.inSeconds == 271) {
+          _showMyDialog();
+        }
+        // Navigator.pop(context);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _videoPlayerController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(''),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('ต้องการบันทึกวันและเวลาหรือไม่'),
+                // Text('Would you like to approve of this message?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('ยืนยัน'),
+              onPressed: () async {
+                var now = new DateTime.now();
+                Map<String, dynamic> decodedToken = JwtDecoder.decode(tokens);
+                String url = 'https://infinite-caverns-30215.herokuapp.com/date';
+                String json =
+                    '{"userid": "${decodedToken['id']}" ,"date": "${now.day}-${now.month}-${now.year + 543}","time":"${now.hour}:${now.minute}"}';
+                var response = await http.post(url, body: json);
+                var uu = jsonDecode(response.body);
+                print(uu['status']);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => History()));
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<bool> started() async {
+    await _videoPlayerController.initialize();
+    await _videoPlayerController.play();
+    startedPlaying = true;
+    return true;
+  }
+
+  Future<bool> checktoken() async {
+    if (tokens == null) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String token = prefs.getString('token');
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+      setState(() {
+        tokens = token;
+        email = decodedToken['email'];
+        name = decodedToken['name'];
+        ids = decodedToken['id'];
+        return true;
+      });
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("home")),
-      body: Container(
-        width: double.infinity,
-        child: Column(
-          children: <Widget>[
-            _BumbleBeeRemoteVideo(),
-          ],
-        ),
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              child: Text('Drawer Header'),
-              decoration: BoxDecoration(
-                color: Colors.blue,
+    double width = MediaQuery.of(context).size.width;
+    return FutureBuilder(
+        future: checktoken(),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (tokens != null) {
+            return Scaffold(
+              appBar: AppBar(title: Text("วีดีโอออกกำลังกาย")),
+              body: Container(
+                width: double.infinity,
+                child: Column(
+                  children: <Widget>[
+                    Material(
+                      elevation: 0,
+                      child: Column(children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.only(top: 15),
+                          child: FutureBuilder<bool>(
+                            future: started(),
+                            builder: (BuildContext context,
+                                AsyncSnapshot<bool> snapshot) {
+                              if (snapshot.data == true) {
+                                return AspectRatio(
+                                  aspectRatio:
+                                      _videoPlayerController.value.aspectRatio,
+                                  child: Stack(
+                                    alignment: Alignment.bottomCenter,
+                                    children: <Widget>[
+                                      VideoPlayer(_videoPlayerController),
+                                      ClosedCaption(
+                                          text: _videoPlayerController
+                                              .value.caption.text),
+                                      _ControlsOverlay(
+                                          controller: _videoPlayerController),
+                                      VideoProgressIndicator(
+                                          _videoPlayerController,
+                                          allowScrubbing: true),
+                                    ],
+                                  ),
+                                );
+                              } else {
+                                return const Text('waiting for video to load');
+                              }
+                            },
+                          ),
+                        ),
+                      ]),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            ListTile(
-              title: Text(
-                'ตั้งค่า',
-                style: TextStyle(fontSize: 18),
+              drawer: Container(
+                width: width * 0.6,
+                child: Drawer(
+                  child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: <Widget>[
+                      DrawerHeader(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            CircleAvatar(
+                              child: Image.asset(
+                                'assets/logo.png',
+                              ),
+                            ),
+                            Text('ชื่อ : $name'),
+                            Text('อีเมล์ : $email')
+                          ],
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                        ),
+                      ),
+                      ListTile(
+                        title: Text(
+                          'ตั้งค่า',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Notication()));
+                        },
+                      ),
+                      ListTile(
+                        title: Text(
+                          'สถิติ',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        onTap: () async {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) => History()));
+                        },
+                      ),
+                      ListTile(
+                        title: Text(
+                          'ออกจากระบบ',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        onTap: () async {
+                          SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
+                          prefs.clear();
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) => MyApp()));
+                        },
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              onTap: () {
-                print("ddd");
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Notication()));
-              },
-            ),
-            ListTile(
-              title: Text(
-                'ออกจากระบบ',
-                style: TextStyle(fontSize: 18),
-              ),
-              onTap: ()async {
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.clear();
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => MyApp()));
-              },
-            ),
-          ],
-        ),
-      ),
-    );
+            );
+          } else {
+            return Scaffold(
+              body: Loading(),
+            );
+          }
+        });
   }
 }
 
@@ -212,21 +380,15 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
   @override
   void initState() {
     super.initState();
-
-    _videoPlayerController =
-        VideoPlayerController.asset('assets/video.mp4');
+    _videoPlayerController = VideoPlayerController.asset('assets/video.mp4');
     _videoPlayerController.addListener(() {
       if (startedPlaying && !_videoPlayerController.value.isPlaying) {
-          
-        print(_videoPlayerController.value.position.inSeconds);
-        print("555555555555555555555555555555555555555555555");
-          if (_videoPlayerController.value.position.inSeconds == 271) {
-            _showMyDialog();
-              }
+        if (_videoPlayerController.value.position.inSeconds == 271) {
+          _showMyDialog();
+        }
         // Navigator.pop(context);
       }
     });
-
   }
 
   @override

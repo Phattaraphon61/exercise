@@ -19,7 +19,7 @@ class _MyAppState extends State<MyApp> {
   String ttt;
   Future<bool> loadList() async {
     if (ttt != 'Welcome') {
-      String url = 'http://192.168.1.64:5000';
+      String url = 'https://infinite-caverns-30215.herokuapp.com';
       var response = await http.get(url);
       var uu = jsonDecode(response.body);
       print(uu);
