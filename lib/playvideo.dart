@@ -1,19 +1,18 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-// ignore_for_file: public_member_api_docs
-
 import 'package:exercise/main.dart';
 import 'package:exercise/nogication.dart';
-/// An example of using the plugin, controlling lifecycle and playback of the
-/// video.
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 
-class Playvideo extends StatelessWidget {
+class Playvideo extends StatefulWidget {
+  @override
+  _PlayvideoState createState() => _PlayvideoState();
+}
+
+class _PlayvideoState extends State<Playvideo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,11 +26,7 @@ class Playvideo extends StatelessWidget {
         ),
       ),
       drawer: Drawer(
-        // Add a ListView to the drawer. This ensures the user can scroll
-        // through the options in the drawer if there isn't enough vertical
-        // space to fit everything.
         child: ListView(
-          // Important: Remove any padding from the ListView.
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
@@ -41,72 +36,32 @@ class Playvideo extends StatelessWidget {
               ),
             ),
             ListTile(
-              title: Text('ตั้งค่า',style: TextStyle(fontSize: 18),),
+              title: Text(
+                'ตั้งค่า',
+                style: TextStyle(fontSize: 18),
+              ),
               onTap: () {
                 print("ddd");
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => Notication()));
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                // Navigator.pop(context);
               },
             ),
             ListTile(
-              title: Text('ออกจากระบบ',style: TextStyle(fontSize: 18),),
-              onTap: () {
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => MyApp()));
+              title: Text(
+                'ออกจากระบบ',
+                style: TextStyle(fontSize: 18),
+              ),
+              onTap: ()async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.clear();
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => MyApp()));
               },
             ),
           ],
         ),
       ),
     );
-    // return DefaultTabController(
-    //   length: 1,
-    //   child: Scaffold(
-    //     key: const ValueKey<String>('home_page'),
-    //     appBar: AppBar(
-    //       title: const Text('Video player example'),
-    //       actions: <Widget>[
-    //         // IconButton(
-    //         //   key: const ValueKey<String>('push_tab'),
-    //         //   icon: const Icon(Icons.navigation),
-    //         //   onPressed: () {
-    //         //     Navigator.push<_PlayerVideoAndPopPage>(
-    //         //       context,
-    //         //       MaterialPageRoute<_PlayerVideoAndPopPage>(
-    //         //         builder: (BuildContext context) => _PlayerVideoAndPopPage(),
-    //         //       ),
-    //         //     );
-    //         //   },
-    //         // )
-    //       ],
-    //       // bottom: const TabBar(
-    //       //   isScrollable: true,
-    //       //   tabs: <Widget>[
-    //       //     Tab(
-    //       //       icon: Icon(Icons.cloud),
-    //       //       text: "Remote",
-    //       //     ),
-    //       //     Tab(icon: Icon(Icons.insert_drive_file), text: "Asset"),
-    //       //     Tab(icon: Icon(Icons.list), text: "List example"),
-    //       //   ],
-    //       // ),
-    //     ),
-    //     body: TabBarView(
-    //       children: <Widget>[
-    //         _BumbleBeeRemoteVideo(),
-    //         // _ButterFlyAssetVideo(),
-    //         // _ButterFlyAssetVideoInList(),
-    //       ],
-    //     ),
-    //   ),
-    // );
   }
 }
 
@@ -252,20 +207,26 @@ class _BumbleBeeRemoteVideo extends StatefulWidget {
 class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
   VideoPlayerController _videoPlayerController;
   bool startedPlaying = false;
+  Time timeee;
 
   @override
   void initState() {
     super.initState();
 
     _videoPlayerController =
-        VideoPlayerController.asset('assets/Butterfly-209.mp4');
+        VideoPlayerController.asset('assets/video.mp4');
     _videoPlayerController.addListener(() {
       if (startedPlaying && !_videoPlayerController.value.isPlaying) {
+          
+        print(_videoPlayerController.value.position.inSeconds);
         print("555555555555555555555555555555555555555555555");
-        _showMyDialog();
+          if (_videoPlayerController.value.position.inSeconds == 271) {
+            _showMyDialog();
+              }
         // Navigator.pop(context);
       }
     });
+
   }
 
   @override
@@ -293,7 +254,8 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
             TextButton(
               child: Text('ยืนยัน'),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Notication()));
               },
             ),
           ],
@@ -316,11 +278,6 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
     return Material(
       elevation: 0,
       child: Column(children: <Widget>[
-        SizedBox(
-          height: height * 0.2,
-        ),
-        Container(padding: const EdgeInsets.only(top: 20)),
-        const Text('วีดีโอออกกำลังกาย'),
         Padding(
           padding: const EdgeInsets.only(top: 15),
           child: FutureBuilder<bool>(

@@ -4,6 +4,7 @@ import 'package:exercise/register.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Notication extends StatefulWidget {
   @override
@@ -97,7 +98,7 @@ class _NoticationState extends State<Notication> {
     await flutterLocalNotificationsPlugin.schedule(
       1,
       'Hello there',
-      '5555555',
+      'ถึงเวลาออกกำลังกายแล้ว นะคะ',
       timeDelayed,
       notificationDetails,
     );
@@ -141,11 +142,11 @@ class _NoticationState extends State<Notication> {
     print(time);
     _showNotificationsAfterSecond();
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("setting")),
+      appBar: AppBar(title: Text("ตั้งค่า")),
       body: Container(
         width: double.infinity,
         child: Column(
@@ -174,9 +175,9 @@ class _NoticationState extends State<Notication> {
             //   ),
             // ),
             FlatButton(
-              onPressed: () {
-                _selectTime(context);
-                print(time);
+              onPressed: () {            
+                // _selectTime(context);
+                // print(time);
               },
               color: Colors.blue,
               child: Padding(
@@ -205,7 +206,10 @@ class _NoticationState extends State<Notication> {
               ),
             ),
             ListTile(
-              title: Text('Home',style: TextStyle(fontSize: 18),),
+              title: Text(
+                'วีดีโอ',
+                style: TextStyle(fontSize: 18),
+              ),
               onTap: () {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => Playvideo()));
@@ -216,13 +220,18 @@ class _NoticationState extends State<Notication> {
               },
             ),
             ListTile(
-              title: Text('ออกจากระบบ',style: TextStyle(fontSize: 18),),
-              onTap: () {
+              title: Text(
+                'ออกจากระบบ',
+                style: TextStyle(fontSize: 18),
+              ),
+              onTap: () async {
                 // Update the state of the app
                 // ...
                 // Then close the drawer
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => MyApp()));
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.clear();
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => MyApp()));
               },
             ),
           ],

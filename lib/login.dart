@@ -1,40 +1,48 @@
 import 'dart:convert';
 
-import 'package:exercise/login.dart';
 import 'package:exercise/main.dart';
+import 'package:exercise/playvideo.dart';
+import 'package:exercise/register.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'nogication.dart';
 import 'package:http/http.dart' as http;
 
-class Second extends StatefulWidget {
+class Login extends StatefulWidget {
+  Login({Key key, this.title}) : super(key: key);
+  final String title;
+
   @override
-  _SecondState createState() => _SecondState();
+  _LoginState createState() => _LoginState();
 }
 
-class _SecondState extends State<Second> {
+class _LoginState extends State<Login> {
+  bool isLoading = true;
   bool _passwordVisible = true;
-  final name = TextEditingController();
   final email = TextEditingController();
   final password = TextEditingController();
-  final conpassword = TextEditingController();
+
+  void signin() async {
+    String url = 'http://192.168.1.64:5000/signin';
+    String json = '{"email": "${email.text}","password":"${password.text}"}';
+    var response = await http.post(url, body: json);
+    var uu = jsonDecode(response.body);
+    if (uu['status'] == "singin success") {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', uu['token']);
+      Navigator.push(context, MaterialPageRoute(builder: (context) => MyApp()));
+    }
+    setState(() {
+    isLoading = true;
+    });
+    
+  }
 
   @override
   void dispose() {
-    name.dispose();
     email.dispose();
     password.dispose();
-    conpassword.dispose();
     super.dispose();
-  }
-
-  void signup() async{
-    String url = 'https://infinite-caverns-30215.herokuapp.com/signup';
-    String json = '{"name": "${name.text}","email": "${email.text}","password":"${password.text}"}';
-    var response = await http.post(url, body: json);
-    var uu = jsonDecode(response.body);
-    print(uu['status']);
-    if (uu['status'] == "success") {
-      print("yes");
-    }
   }
 
   @override
@@ -51,7 +59,21 @@ class _SecondState extends State<Second> {
             children: [
               Container(
                 width: width,
-                height: height * 0.15,
+                height: height * 0.45,
+                child: Image.asset(
+                  'logo.png',
+                  fit: BoxFit.fill,
+                ),
+              ),
+              Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    isLoading
+                        ? Text("")
+                        : Center(child: CircularProgressIndicator()),
+                  ],
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -59,7 +81,7 @@ class _SecondState extends State<Second> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text(
-                      'สมัครสมาชิก',
+                      'เข้าสู่ระบบ',
                       style: TextStyle(
                           fontSize: 25.0, fontWeight: FontWeight.bold),
                     ),
@@ -67,30 +89,13 @@ class _SecondState extends State<Second> {
                 ),
               ),
               SizedBox(
-                height: 20,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: name,
-                  decoration: InputDecoration(
-                    hintText: 'ชื่อ นามสกุล',
-                    isDense: true,
-                    contentPadding: EdgeInsets.all(8),
-                    suffixIcon: Icon(Icons.account_box),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 10,
+                height: 30.0,
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
                   controller: email,
+                  // style: TextStyle(height: 0.1),
                   decoration: InputDecoration(
                     hintText: 'อีเมล์',
                     isDense: true,
@@ -101,9 +106,6 @@ class _SecondState extends State<Second> {
                     ),
                   ),
                 ),
-              ),
-              SizedBox(
-                height: 10,
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -136,56 +138,29 @@ class _SecondState extends State<Second> {
                   ),
                 ),
               ),
-              SizedBox(
-                height: 10,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: conpassword,
-                  obscureText: _passwordVisible,
-                  keyboardType: TextInputType.visiblePassword,
-                  decoration: InputDecoration(
-                    hintText: 'ยืนยันรหัสผ่าน',
-                    isDense: true,
-                    contentPadding: EdgeInsets.all(8),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        // Based on passwordVisible state choose the icon
-                        _passwordVisible
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                        color: Theme.of(context).primaryColorDark,
-                      ),
-                      onPressed: () {
-                        // Update the state i.e. toogle the state of passwordVisible variable
-                        setState(() {
-                          _passwordVisible = !_passwordVisible;
-                        });
-                      },
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
               Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    Text(
+                      'ลืมรหัสผ่าน',
+                      style: TextStyle(fontSize: 12.0),
+                    ),
                     RaisedButton(
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18.0),
                           side: BorderSide(color: Colors.red)),
-                      child: Text('ยืนยันการสมัครสมาชิก'),
+                      child: Text('ยืนยัน'),
                       color: Color(0xffEE7B23),
                       onPressed: () {
-                        signup();
+                        setState(() {
+                          isLoading = false;
+                        });
+
+                        signin();
+                        // Navigator.push(context,
+                        //     MaterialPageRoute(builder: (context) => Playvideo()));
                       },
                     ),
                   ],
@@ -195,12 +170,12 @@ class _SecondState extends State<Second> {
               GestureDetector(
                 onTap: () {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => Login()));
+                      MaterialPageRoute(builder: (context) => Second()));
                 },
                 child: Text.rich(
-                  TextSpan(text: 'กลับไปหน้า', children: [
+                  TextSpan(text: 'ไปหน้า', children: [
                     TextSpan(
-                      text: 'เข้าสู่ระบบr',
+                      text: 'สมัครสมาชิก',
                       style: TextStyle(color: Color(0xffEE7B23)),
                     ),
                   ]),

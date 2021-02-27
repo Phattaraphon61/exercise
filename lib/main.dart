@@ -1,157 +1,112 @@
-import 'package:exercise/playvideo.dart';
-import 'package:exercise/register.dart';
+import 'dart:convert';
+
+import 'package:exercise/loading.dart';
+import 'package:exercise/login.dart';
+import 'package:exercise/nogication.dart';
 import 'package:flutter/material.dart';
-import 'nogication.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 void main() => runApp(MyApp());
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  String tokens;
+  String ttt;
+  Future<bool> loadList() async {
+    if (ttt != 'Welcome') {
+      String url = 'http://192.168.1.64:5000';
+      var response = await http.get(url);
+      var uu = jsonDecode(response.body);
+      print(uu);
+      setState(() {
+        ttt = uu['status'];
+      });
+      if (uu['status'] == 'Welcome') {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String token = prefs.getString('token');
+        print(token);
+        setState(() {
+          tokens = token;
+        });
+
+      }
+    }
+    // String url = 'https://infinite-caverns-30215.herokuapp.com';
+    // var response = await http.get(url);
+    // var uu = jsonDecode(response.body);
+    // print(uu);
+    // if (uu['status'] == 'Welcome') {
+    //   SharedPreferences prefs = await SharedPreferences.getInstance();
+    //   String token = prefs.getString('token');
+    //   print(token);
+    //   setState(() {
+    //     tokens = token;
+    //   });
+    //   return true;
+    // }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'Flutter Deomos',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Login'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  bool _passwordVisible = true;
-  @override
-  Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
-    return Scaffold(
-      body: Container(
-        height: height,
-        width: width,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: width,
-                height: height * 0.45,
-                child: Image.asset(
-                  'logo.png',
-                  fit: BoxFit.fill,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Login',
-                      style: TextStyle(
-                          fontSize: 25.0, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 30.0,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  // style: TextStyle(height: 0.1),
-                  decoration: InputDecoration(
-                    hintText: 'Email',
-                    isDense: true,
-                    contentPadding: EdgeInsets.all(8),
-                    suffixIcon: Icon(Icons.email),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  obscureText: _passwordVisible,
-                  keyboardType: TextInputType.visiblePassword,
-                  decoration: InputDecoration(
-                    hintText: 'Password',
-                    isDense: true,
-                    contentPadding: EdgeInsets.all(8),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        // Based on passwordVisible state choose the icon
-                        _passwordVisible
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                        color: Theme.of(context).primaryColorDark,
-                      ),
-                      onPressed: () {
-                        // Update the state i.e. toogle the state of passwordVisible variable
-                        setState(() {
-                          _passwordVisible = !_passwordVisible;
-                        });
-                      },
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Forget password?',
-                      style: TextStyle(fontSize: 12.0),
-                    ),
-                    RaisedButton(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.0),
-                          side: BorderSide(color: Colors.red)),
-                      child: Text('Login'),
-                      color: Color(0xffEE7B23),
-                      onPressed: () {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => Playvideo()));
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20.0),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => Second()));
-                },
-                child: Text.rich(
-                  TextSpan(text: 'Don\'t have an account', children: [
-                    TextSpan(
-                      text: 'Signup',
-                      style: TextStyle(color: Color(0xffEE7B23)),
-                    ),
-                  ]),
-                ),
-              ),
-            ],
-          ),
-        ),
+      home: FutureBuilder(
+        future: loadList(),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.hasData) {
+            if (tokens != null) {
+              return Scaffold(
+                body: Notication(),
+              );
+            } else {
+              print("ddddd");
+              return Scaffold(
+                body: Login(),
+              );
+            }
+            // return Scaffold(
+            //   body: Notication(),
+            // );
+          } else {
+            return Scaffold(
+              body: Loading(),
+            );
+          }
+        },
       ),
     );
   }
 }
+
+// class MyApp extends StatelessWidget {
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       title: 'Flutter Demo',
+//       theme: ThemeData(
+//         primarySwatch: Colors.blue,
+//       ),
+//       home: Scaffold(
+//         backgroundColor: Colors.blue[900],
+//         body: Center(
+//           child: SpinKitPouringHourglass(
+//             color: Colors.white,
+//             size: 120,
+//           ),
+//         ),
+//       )
+//     );
+//   }
+// }
