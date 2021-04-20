@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:exercise/history.dart';
 import 'package:exercise/loading.dart';
 import 'package:exercise/login.dart';
 import 'package:exercise/nogication.dart';
@@ -7,7 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
-void main() => runApp(MyApp());
+void main(){
+runApp(MyApp());
+}
+
 
 class MyApp extends StatefulWidget {
   @override
@@ -66,9 +69,9 @@ class _MyAppState extends State<MyApp> {
           if (snapshot.hasData) {
             if (tokens != null) {
               return Scaffold(
-                body: Notication(),
+                body: History(),
               );
-            } else {
+            } if(tokens == null) {
               print("ddddd");
               return Scaffold(
                 body: Login(),

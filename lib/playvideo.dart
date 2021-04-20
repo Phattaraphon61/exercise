@@ -1,10 +1,11 @@
 import 'dart:convert';
 
+import 'package:chewie/chewie.dart';
 import 'package:exercise/history.dart';
 import 'package:exercise/loading.dart';
 import 'package:exercise/main.dart';
 import 'package:exercise/nogication.dart';
-
+import 'package:exercise/videos_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -24,28 +25,35 @@ class _PlayvideoState extends State<Playvideo> {
   String ids;
   String tokens;
 
-  VideoPlayerController _videoPlayerController;
+  ChewieController videosController;
   bool startedPlaying = false;
   Time timeee;
 
   @override
   void initState() {
     super.initState();
-    _videoPlayerController = VideoPlayerController.asset('assets/video.mp4');
-    _videoPlayerController.addListener(() {
-      if (startedPlaying && !_videoPlayerController.value.isPlaying) {
-        if (_videoPlayerController.value.position.inSeconds == 271) {
+    videosController = ChewieController(
+      videoPlayerController: VideoPlayerController.asset(
+        'assets/video.mp4',
+      ),
+      aspectRatio: 16 / 9,
+      autoInitialize: true,
+      looping: true,
+      errorBuilder: (context, errorMessage) {
+        return Center(child: progressBar());
+      },
+    );
+    videosController.videoPlayerController.addListener(() {
+      if (!videosController.videoPlayerController.value.isPlaying) {
+        print(videosController.videoPlayerController.value.position.inSeconds);
+        if (videosController.videoPlayerController.value.position.inSeconds ==
+            271) {
+          print('555');
+          videosController.exitFullScreen();
           _showMyDialog();
         }
-        // Navigator.pop(context);
       }
     });
-  }
-
-  @override
-  void dispose() {
-    _videoPlayerController.dispose();
-    super.dispose();
   }
 
   Future<void> _showMyDialog() async {
@@ -65,11 +73,26 @@ class _PlayvideoState extends State<Playvideo> {
           ),
           actions: <Widget>[
             TextButton(
+              child: Text('ยกเลิก'),
+              onPressed: () async {
+                // var now = new DateTime.now();
+                // Map<String, dynamic> decodedToken = JwtDecoder.decode(tokens);
+                // String url = 'https://infinite-caverns-30215.herokuapp.com/date';
+                // String json =
+                //     '{"userid": "${decodedToken['id']}" ,"date": "${now.day}-${now.month}-${now.year + 543}","time":"${now.hour}:${now.minute}"}';
+                // var response = await http.post(url, body: json);
+                // var uu = jsonDecode(response.body);
+                // print(uu['status']);
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
               child: Text('ยืนยัน'),
               onPressed: () async {
                 var now = new DateTime.now();
                 Map<String, dynamic> decodedToken = JwtDecoder.decode(tokens);
-                String url = 'https://infinite-caverns-30215.herokuapp.com/date';
+                String url =
+                    'https://infinite-caverns-30215.herokuapp.com/date';
                 String json =
                     '{"userid": "${decodedToken['id']}" ,"date": "${now.day}-${now.month}-${now.year + 543}","time":"${now.hour}:${now.minute}"}';
                 var response = await http.post(url, body: json);
@@ -83,13 +106,6 @@ class _PlayvideoState extends State<Playvideo> {
         );
       },
     );
-  }
-
-  Future<bool> started() async {
-    await _videoPlayerController.initialize();
-    await _videoPlayerController.play();
-    startedPlaying = true;
-    return true;
   }
 
   Future<bool> checktoken() async {
@@ -108,6 +124,18 @@ class _PlayvideoState extends State<Playvideo> {
     return true;
   }
 
+  Widget progressBar() {
+    return null;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    // IMPORTANT to dispose of all the used resources
+    // widget.videoPlayerController.dispose();
+    videosController.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -117,49 +145,18 @@ class _PlayvideoState extends State<Playvideo> {
           if (tokens != null) {
             return Scaffold(
               appBar: AppBar(title: Text("วีดีโอออกกำลังกาย")),
-              body: Container(
-                width: double.infinity,
-                child: Column(
-                  children: <Widget>[
-                    Material(
-                      elevation: 0,
-                      child: Column(children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.only(top: 15),
-                          child: FutureBuilder<bool>(
-                            future: started(),
-                            builder: (BuildContext context,
-                                AsyncSnapshot<bool> snapshot) {
-                              if (snapshot.data == true) {
-                                return AspectRatio(
-                                  aspectRatio:
-                                      _videoPlayerController.value.aspectRatio,
-                                  child: Stack(
-                                    alignment: Alignment.bottomCenter,
-                                    children: <Widget>[
-                                      VideoPlayer(_videoPlayerController),
-                                      ClosedCaption(
-                                          text: _videoPlayerController
-                                              .value.caption.text),
-                                      _ControlsOverlay(
-                                          controller: _videoPlayerController),
-                                      VideoProgressIndicator(
-                                          _videoPlayerController,
-                                          allowScrubbing: true),
-                                    ],
-                                  ),
-                                );
-                              } else {
-                                return const Text('waiting for video to load');
-                              }
-                            },
-                          ),
-                        ),
-                      ]),
-                    ),
-                  ],
+            body: Stack(children: <Widget>[
+          ListView(
+            children: <Widget>[
+              VideosList(
+                videoPlayerController: VideoPlayerController.asset(
+                  'assets/video.mp4',
                 ),
+                looping: false,
               ),
+            ],
+          ),
+        ]),
               drawer: Container(
                 width: width * 0.6,
                 child: Drawer(
@@ -202,8 +199,10 @@ class _PlayvideoState extends State<Playvideo> {
                           style: TextStyle(fontSize: 18),
                         ),
                         onTap: () async {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) => History()));
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => History()));
                         },
                       ),
                       ListTile(

@@ -53,6 +53,8 @@ class _DataTableExample extends State<History> {
     return true;
   }
 
+  
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -63,12 +65,12 @@ class _DataTableExample extends State<History> {
             return MaterialApp(
               home: Scaffold(
                 appBar: AppBar(
-                  title: Text('สิถิติการออกกำลังกาย'),
+                  title: Text('สถิติการออกกำลังกาย'),
                 ),
                 body: ListView(children: <Widget>[
                   Center(
                       child: Text(
-                    'สิถิติการออกกำลังกาย',
+                    'สถิติการออกกำลังกาย',
                     style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                   )),
                   DataTable(columns: [

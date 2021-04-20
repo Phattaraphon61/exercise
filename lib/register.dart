@@ -11,7 +11,12 @@ class Second extends StatefulWidget {
 }
 
 class _SecondState extends State<Second> {
+  bool erroremail = false;
   bool _passwordVisible = true;
+  bool _passwordVisibles = true;
+  bool errorpass = false;
+  bool errorconpass = false;
+  bool isLoading = true;
   final name = TextEditingController();
   final email = TextEditingController();
   final password = TextEditingController();
@@ -26,14 +31,50 @@ class _SecondState extends State<Second> {
     super.dispose();
   }
 
-  void signup() async{
+  void signup() async {
+    setState(() {
+      isLoading = false;
+      erroremail = false;
+    });
     String url = 'https://infinite-caverns-30215.herokuapp.com/signup';
-    String json = '{"name": "${name.text}","email": "${email.text}","password":"${password.text}"}';
+    String json =
+        '{"name": "${name.text}","email": "${email.text}","password":"${password.text}"}';
     var response = await http.post(url, body: json);
     var uu = jsonDecode(response.body);
     print(uu['status']);
+    if (uu['status'] == 'this email has already been used') {
+      setState(() {
+        isLoading = true;
+        erroremail = true;
+      });
+    }
     if (uu['status'] == "success") {
       print("yes");
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => Login()));
+      setState(() {
+        isLoading = true;
+      });
+    }
+  }
+
+  void checktext() {
+    setState(() {
+      errorconpass = false;
+      errorpass = false;
+    });
+    if (password.text.length >= 8 && password.text == conpassword.text) {
+      signup();
+    }
+    if (password.text.length < 8) {
+      setState(() {
+        errorpass = true;
+      });
+    }
+    if (password.text != conpassword.text) {
+      setState(() {
+        errorconpass = true;
+      });
     }
   }
 
@@ -99,6 +140,7 @@ class _SecondState extends State<Second> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20.0),
                     ),
+                    errorText: erroremail ? 'อีเมล์นี้มีคนใช้ไปแล้ว' : null,
                   ),
                 ),
               ),
@@ -109,7 +151,7 @@ class _SecondState extends State<Second> {
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
                   controller: password,
-                  obscureText: _passwordVisible,
+                  obscureText: _passwordVisibles,
                   keyboardType: TextInputType.visiblePassword,
                   decoration: InputDecoration(
                     hintText: 'รหัสผ่าน',
@@ -121,7 +163,7 @@ class _SecondState extends State<Second> {
                     suffixIcon: IconButton(
                       icon: Icon(
                         // Based on passwordVisible state choose the icon
-                        _passwordVisible
+                        _passwordVisibles
                             ? Icons.visibility
                             : Icons.visibility_off,
                         color: Theme.of(context).primaryColorDark,
@@ -129,10 +171,12 @@ class _SecondState extends State<Second> {
                       onPressed: () {
                         // Update the state i.e. toogle the state of passwordVisible variable
                         setState(() {
-                          _passwordVisible = !_passwordVisible;
+                          _passwordVisibles = !_passwordVisibles;
                         });
                       },
                     ),
+                    errorText:
+                        errorpass ? 'รหัสผ่านต้องมีอย่างน้อย 8 ตัว' : null,
                   ),
                 ),
               ),
@@ -167,6 +211,7 @@ class _SecondState extends State<Second> {
                         });
                       },
                     ),
+                    errorText: errorconpass ? 'รหัสผ่านไม่ตรงกัน' : null,
                   ),
                 ),
               ),
@@ -178,16 +223,18 @@ class _SecondState extends State<Second> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    RaisedButton(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.0),
-                          side: BorderSide(color: Colors.red)),
-                      child: Text('ยืนยันการสมัครสมาชิก'),
-                      color: Color(0xffEE7B23),
-                      onPressed: () {
-                        signup();
-                      },
-                    ),
+                    isLoading
+                        ? RaisedButton(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.0),
+                                side: BorderSide(color: Colors.red)),
+                            child: Text('ยืนยันการสมัครสมาชิก'),
+                            color: Color(0xffEE7B23),
+                            onPressed: () {
+                              checktext();
+                            },
+                          )
+                        : Center(child: CircularProgressIndicator()),
                   ],
                 ),
               ),
@@ -200,7 +247,7 @@ class _SecondState extends State<Second> {
                 child: Text.rich(
                   TextSpan(text: 'กลับไปหน้า', children: [
                     TextSpan(
-                      text: 'เข้าสู่ระบบr',
+                      text: 'เข้าสู่ระบบ',
                       style: TextStyle(color: Color(0xffEE7B23)),
                     ),
                   ]),
